@@ -1,12 +1,17 @@
 {
   "name": "youtube-aws-throttle",
   "version": "1.0.0",
-  "description": "",
+  "description": "AWS throttle issue resolve",
   "main": "index.js",
+  "repository": "https://github.com/nithinpachday/youtube-throttle-fix-demo",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": {
+    "name": "Nithin P B",
+    "email": "",
+    "url": "https://www.linkedin.com/in/nithin-p-b-a0818475/"
+  },
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1160.0",
