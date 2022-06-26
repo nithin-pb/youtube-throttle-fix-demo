@@ -1,40 +1,47 @@
 require('dotenv').config()
-const AWS = require('aws-sdk')
 
+const AWS = require('aws-sdk')
 const awsConfig = {
     region: 'us-east-1',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 }
-
 AWS.config.update(awsConfig)
+const client = new AWS.EC2()
 
 const ThrottleFixer = require('aws-throttle-fixer')
 const TF = new ThrottleFixer()
-TF.configure({ retryCount: 1, logger: console.log, exceptionCodes: ['RequestLimitExceeded'] })
-const throttleFixFn = TF.throttleFixer()
+const tfConfig = {
+    retryCount: 10,
+    exceptionCodes: ['RequestLimitExceeded']
+}
+TF.configure(tfConfig)
+const throttleFixFunction = TF.throttleFixer()
 
 
-const client = new AWS.EC2()
-const service = 'describeSnapshots'
 
-
-async function awsCalls() {
+async function describeFirst10Snapshots() {
     try {
-        async function test() {
-            const params = { MaxResults: 10 }
-            //const { Snapshots } = client.describeSnapshots(params).promise()
-            const { Snapshots } = await throttleFixFn(client, service, params)
-            console.log('Snapshot count', Snapshots.length)
-        }
+
         let i = 0
         do {
             i = i + 1
-            test().then()
+            callAwsApi()
+                .then(e => console.log(e))
+                .catch(e => console.error(e))
         } while (i < 400)
+
     } catch (e) {
         console.error(e)
     }
 }
 
-awsCalls().then()
+
+async function callAwsApi() {
+    const params = { MaxResults: 10 }
+    //const { Snapshots } = await client.describeSnapshots(params).promise()
+    const { Snapshots } = await throttleFixFunction(client, 'describeSnapshots', params)
+    return Snapshots.length
+}
+
+describeFirst10Snapshots().then()
